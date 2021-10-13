@@ -1,32 +1,54 @@
+require 'json'
+require 'rest-client'
+
 class Translate
     def initialize
 
         @subscription_key = 'b856946588d74656bcc528de40698222'
         @location = 'brazilsouth'
+        @endpoint = 'https://api.cognitive.microsofttranslator.com'
         @path = '/translate?api-version=3.0'
+        @headers = {"Ocp-Apim-Subscription-Key" => '9edbc30109a14f6087eaab70be3accc9', "Ocp-Apim-Subscription-Region" => 'brazilsouth', "Content-Type" =>'application/json'}
 
-        puts "Digite o idioma a ser. Ex: en,it,fr "
-        @to = gets.chomp
-        puts "Digite o texto original a ser traduzido: "
+        puts "Digite o texto original: "
         @text= gets.chomp
+        puts "Digite o idioma do texto traduzido. Ex: en,it,fr "
+        @to = gets.chomp
 
-        @params= "&to=#{to}"
-
+        @params= "&to=#{@to}"
+                
         puts 'Traduzindo o texto...'
-        puts "Original: " + @text
+        body_hash = translate_text
+        time_now_str = Time.now.strftime('%d.%m.%y--%H-%M-%S-%p')
+        File.open("#{time_now_str}.txt","w+") do |line|
+            line.write("Original[#{body_hash[:original_language_req].upcase}]: " + @text)
+            line.write("\n")
+            line.write("Traduzido[#{@to.upcase}]: " + body_hash[:translated_text_req])
+        end
 
-        json_translated = translate_text[0]['translations'][0]['text']
+        puts "Original[#{body_hash[:original_language_req].upcase}]: " + @text
+        puts "Traduzido[#{@to.upcase}]: " + body_hash[:translated_text_req]
 
-        puts "Traduzido[#{to}]: " + json_translated
-
-        write(@text, json_translated)
     end
 
     def translate_text
         content = '[{"Text" : "' + @text + '"}]'
-        return send_req(content)
+        body_req = send_req(content)
+
+        original_language_req = body_req[0]['detectedLanguage']['language']
+        translated_text_req = body_req[0]['translations'][0]['text']
+
+        hash_req = {:original_language_req => original_language_req, :translated_text_req => translated_text_req}
+        return hash_req
     end
 
-    def send_req(content)
-        
+    private def send_req(content)
+        constructed_url = @endpoint + @path + @params
+        res = RestClient.post "#{constructed_url}", content, @headers
+
+        return JSON.parse(res)
+    end
+
 end
+
+tr = Translate.new
