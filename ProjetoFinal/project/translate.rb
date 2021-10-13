@@ -4,11 +4,9 @@ require 'rest-client'
 class Translate
     def initialize
 
-        @subscription_key = 'b856946588d74656bcc528de40698222'
-        @location = 'brazilsouth'
         @endpoint = 'https://api.cognitive.microsofttranslator.com'
         @path = '/translate?api-version=3.0'
-        @headers = {"Ocp-Apim-Subscription-Key" => '9edbc30109a14f6087eaab70be3accc9', "Ocp-Apim-Subscription-Region" => 'brazilsouth', "Content-Type" =>'application/json'}
+        @headers = {"Ocp-Apim-Subscription-Key" => 'your_subscription_key ', "Ocp-Apim-Subscription-Region" => 'your_location', "Content-Type" =>'application/json'}
 
         puts "Digite o texto original: "
         @text= gets.chomp
